@@ -3,314 +3,279 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>2chvip.test - 掲示板</title>
+  <title>要望・改善 掲示板</title>
   <style>
-    /* 全体の基本スタイル */
-    body {
-      font-family: sans-serif;
-      background-color: #f5f5f5;
+    /* 全体のデザイン */
+    .poll-board { max-width: 650px; margin: 20px auto; font-family: "Helvetica Neue", Arial, sans-serif; color: #333; line-height: 1.6; }
+    .board-title { border-bottom: 2px solid #990000; padding-bottom: 10px; margin-bottom: 20px; color: #990000; font-size: 1.3em; }
+    .board-desc { font-size: 0.85em; color: #666; margin-bottom: 25px; }
+
+    /* フォームのデザイン */
+    .poll-form { background: #fafafa; padding: 20px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 30px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
+    .input-field { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit; font-size: 0.95em; }
+    textarea.input-field { resize: vertical; min-height: 80px; }
+    .submit-btn { background-color: #0044cc; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 1em; transition: 0.2s; }
+    .submit-btn:hover { background-color: #0033aa; }
+    .submit-btn:disabled { background-color: #999; cursor: not-allowed; }
+
+    /* 投稿カードのデザイン */
+    .poll-container { border-top: 2px dashed #ccc; padding-top: 20px; }
+    .poll-item { border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; margin-bottom: 20px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .poll-question { font-weight: bold; font-size: 1.1em; margin-bottom: 5px; color: #111; }
+    .poll-meta { font-size: 0.8em; color: #888; margin-bottom: 15px; }
+    .poll-name { color: #0044cc; font-weight: bold; }
+
+    /* 本文のデザイン */
+    .poll-body-text {
+      margin-bottom: 15px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      font-size: 0.95em;
       color: #333;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    h1 {
-      border-bottom: 2px solid #ccc;
-      padding-bottom: 10px;
-    }
-
-    /* フォームのスタイル */
-    form {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 30px;
-    }
-
-    form input[type="text"],
-    form textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-
-    form textarea {
-      height: 150px;
-      resize: vertical;
-    }
-
-    .checkbox-container {
-      margin-bottom: 15px;
-      padding: 10px;
-      background-color: #eef9f0;
-      border-left: 4px solid #4caf50;
-    }
-
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-
-    /* 投稿表示エリアのスタイル */
-    .post-card {
-      background-color: #fff;
-      padding: 15px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-
-    .post-header {
-      font-size: 0.9em;
-      color: #666;
-      margin-bottom: 10px;
-      border-bottom: 1px dashed #eee;
-      padding-bottom: 5px;
-    }
-
-    .post-title {
-      font-size: 1.2em;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #222;
-    }
-
-    .post-options {
-      margin-top: 10px;
-      padding: 10px;
       background-color: #f9f9f9;
+      padding: 12px 15px;
       border-radius: 4px;
+      border-left: 4px solid #ccc;
     }
 
-    /* ▼ AAモードがオンの投稿内容に付与する専用クラス ▼ */
-    .aa-mode-text {
-      font-family: "Mona", "Saitamaar", "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
-      white-space: pre; /* 連続するスペースや改行をそのまま表示 */
-      line-height: 1.1; /* 行間をAA向けに詰める */
-      overflow-x: auto; /* 画面幅をはみ出すAAの場合はスクロールさせる */
-      background-color: #fdfdfd;
-      padding: 10px;
-      border: 1px solid #eee;
-    }
+    /* 選択肢と投票率バー */
+    .poll-options-box { margin-top: 15px; }
+    .poll-option-wrapper { margin-bottom: 12px; position: relative; cursor: pointer; }
+    .poll-option-clickarea { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border: 1px solid #ccd6dd; border-radius: 6px; background: #fff; font-size: 0.95em; position: relative; z-index: 2; transition: 0.2s; }
+    .poll-option-wrapper:hover .poll-option-clickarea { border-color: #0044cc; background: #f7fafc; }
+    .poll-option-wrapper.voted .poll-option-clickarea { border-color: #0044cc; font-weight: bold; color: #0044cc; }
+
+    /* 得票数のパーセンテージバー */
+    .poll-bar { position: absolute; top: 1px; left: 1px; bottom: 1px; background: #e2f0fd; border-radius: 5px 0 0 5px; z-index: 1; transition: width 0.6s cubic-bezier(0.1, 0.8, 0.3, 1); }
+    .poll-option-wrapper.voted .poll-bar { background: #bee3f8; }
+    
+    .vote-text { display: flex; align-items: center; gap: 8px; }
+    .vote-count { font-size: 0.9em; color: #555; font-weight: bold; }
   </style>
 </head>
 <body>
 
-  <h1>新規投稿 ＆ アンケート作成</h1>
-
-  <form id="poll-create-form">
-    <div>
-      <label for="poll-name">名前（省略可）</label>
-      <input type="text" id="poll-name" placeholder="名無しさん">
-    </div>
-    
-    <div>
-      <label for="poll-title">タイトル（必須）</label>
-      <input type="text" id="poll-title" placeholder="スレッドのタイトル" required>
-    </div>
-    
-    <div>
-      <label for="poll-body">詳しい内容（必須）</label>
-      <textarea id="poll-body" placeholder="本文を入力してください..." required></textarea>
-    </div>
-    
-    <div>
-      <label for="poll-options">アンケート選択肢（カンマ「,」区切り / 省略可）</label>
-      <input type="text" id="poll-options" placeholder="例: りんご, みかん, ばなな">
+<div class="poll-board">
+  <h3 class="board-title">要望・改善 掲示板</h3>
+  <p class="board-desc">
+    追加してほしい機能や改善案を投稿してください。<br>
+    アンケートの選択肢を入力すると、他のユーザーから投票を受け付けることができます。
+  </p>
+  
+  <!-- 投稿フォーム -->
+  <form id="poll-create-form" class="poll-form">
+    <div class="form-group">
+      <label for="poll-name">お名前（任意）</label>
+      <input type="text" id="poll-name" class="input-field" placeholder="名無しさん">
     </div>
 
-    <div class="checkbox-container">
-      <label>
-        <input type="checkbox" id="poll-aa"> <strong>AA（アスキーアート）として投稿する</strong><br>
-        <small style="color: #666; margin-left: 20px;">※AAのズレを防ぎ、専用のフォントと行間で表示します。</small>
-      </label>
+    <div class="form-group">
+      <label for="poll-title">提案のタイトル（必須）</label>
+      <input type="text" id="poll-title" class="input-field" required placeholder="例: 夜間モードを追加してほしい">
     </div>
 
-    <button type="submit" id="submit-btn">投稿する</button>
+    <div class="form-group">
+      <label for="poll-body">詳しい内容・本文（任意）</label>
+      <textarea id="poll-body" class="input-field" placeholder="なぜこの機能が欲しいか、詳しい説明を書いてください"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>アンケートの選択肢（任意：カンマ「,」区切り）</label>
+      <input type="text" id="poll-options" class="input-field" placeholder="例: 賛成, 反対（※入力しない場合は通常の投稿になります）">
+    </div>
+    
+    <button type="submit" class="submit-btn" id="submit-btn">投稿する</button>
   </form>
 
-  <hr>
-
-  <h2>投稿一覧</h2>
-  <div id="polls-container">
-    <p>読み込み中...</p>
+  <!-- 投稿一覧 -->
+  <div id="polls-list" class="poll-container">
+    <p style="color:#999; text-align:center;">読み込み中...</p>
   </div>
+</div>
 
-  <script type="module">
-    // Firebaseのインポート（v10系）
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    // TODO: ここにご自身のFirebaseプロジェクトの設定値を貼り付けてください
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
+  // Firebase設定
+  const firebaseConfig = {
+    apiKey: "AIzaSyBCQArL0Q1wDveRywCpet5Nor3PuRYt7fM",
+    authDomain: "sabopennet.firebaseapp.com",
+    projectId: "sabopennet",
+    storageBucket: "sabopennet.firebasestorage.app",
+    messagingSenderId: "284308308452",
+    appId: "1:284308308452:web:e36dd991e55a0e60e4c7f1",
+    measurementId: "G-K17XRK5KRN"
+  };
 
-    // Firebaseの初期化
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const pollsCollection = collection(db, 'polls');
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const pollsCollection = collection(db, "user_polls");
+  const q = query(pollsCollection, orderBy("createdAt", "desc"));
 
-    // ----------------------------------------------------
-    // 1. 新規投稿処理（Firebase保存 ＋ Formspreeメール送信 ＋ AA対応）
-    // ----------------------------------------------------
-    document.getElementById('poll-create-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const btn = document.getElementById('submit-btn');
-      btn.disabled = true;
-      btn.innerText = "送信中...";
+  let myVotes = JSON.parse(localStorage.getItem('myPollVotes')) || {};
 
-      const nameInput = document.getElementById('poll-name').value.trim();
-      const titleInput = document.getElementById('poll-title').value.trim();
-      const bodyInput = document.getElementById('poll-body').value.trim();
-      const optionsInput = document.getElementById('poll-options').value;
+  // リアルタイム受信（画面表示）
+  onSnapshot(q, (snapshot) => {
+    const listEl = document.getElementById('polls-list');
+    listEl.innerHTML = '';
+
+    if (snapshot.empty) {
+      listEl.innerHTML = '<p style="color:#999; text-align:center;">まだ投稿はありません。</p>';
+      return;
+    }
+
+    snapshot.forEach((docSnap) => {
+      const poll = docSnap.data();
+      const id = docSnap.id;
       
-      // ▼ AAモードのチェックボックス状態を取得
-      const aaCheckbox = document.getElementById('poll-aa');
-      const isAAMode = aaCheckbox ? aaCheckbox.checked : false;
+      const options = poll.options || [];
+      const votes = poll.votes || [];
+      const totalVotes = votes.reduce((a, b) => a + b, 0);
 
-      const authorName = nameInput || "名無しさん";
-
-      // カンマ区切りの選択肢を配列に変換
-      const optionsArray = optionsInput ? optionsInput.split(',').map(o => o.trim()).filter(o => o !== "") : [];
-
-      if (optionsArray.length === 1) {
-        alert("アンケートを作成する場合は、選択肢を2つ以上入力してください。");
-        btn.disabled = false;
-        btn.innerText = "投稿する";
-        return;
+      let dateStr = "";
+      if (poll.createdAt) {
+        const date = poll.createdAt.toDate();
+        dateStr = `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
       }
+
+      const authorName = poll.name ? escapeHTML(poll.name) : "名無しさん";
+      const bodyHTML = poll.body ? `<div class="poll-body-text">${escapeHTML(poll.body)}</div>` : "";
+
+      const pollEl = document.createElement('div');
+      pollEl.className = 'poll-item';
+      
+      // 選択肢がある場合だけ投票UIを作成
+      let optionsHTML = '';
+      if (options.length > 0) {
+        optionsHTML += '<div class="poll-options-box">';
+        options.forEach((opt, idx) => {
+          const optVotes = votes[idx] || 0;
+          const percent = totalVotes > 0 ? Math.round((optVotes / totalVotes) * 100) : 0;
+          const isMyVote = myVotes[id] === idx;
+          const wrapperClass = isMyVote ? "poll-option-wrapper voted" : "poll-option-wrapper";
+
+          optionsHTML += `
+            <div class="${wrapperClass}" onclick="castVote('${id}', ${idx})">
+              <div class="poll-bar" style="width: ${percent}%"></div>
+              <div class="poll-option-clickarea">
+                <span class="vote-text">${isMyVote ? '🔵 ' : ''}${escapeHTML(opt)}</span>
+                <span class="vote-count">${optVotes}票 (${percent}%)</span>
+              </div>
+            </div>
+          `;
+        });
+        optionsHTML += '</div>';
+      }
+
+      const voteMeta = options.length > 0 ? ` | 総投票数: ${totalVotes}票` : '';
+
+      pollEl.innerHTML = `
+        <div class="poll-question">💡 ${escapeHTML(poll.title)}</div>
+        <div class="poll-meta">提案者: <span class="poll-name">${authorName}</span> | 提案日時: ${dateStr}${voteMeta}</div>
+        ${bodyHTML}
+        ${optionsHTML}
+      `;
+      listEl.appendChild(pollEl);
+    });
+  });
+
+  // 新規投稿処理（Firebase保存 ＋ Formspreeメール送信）
+  document.getElementById('poll-create-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.innerText = "送信中...";
+
+    const nameInput = document.getElementById('poll-name').value.trim();
+    const titleInput = document.getElementById('poll-title').value.trim();
+    const bodyInput = document.getElementById('poll-body').value.trim();
+    const optionsInput = document.getElementById('poll-options').value;
+    const authorName = nameInput || "名無しさん";
+
+    const optionsArray = optionsInput ? optionsInput.split(',').map(o => o.trim()).filter(o => o !== "") : [];
+
+    if (optionsArray.length === 1) {
+      alert("アンケートを作成する場合は、選択肢を2つ以上入力してください。");
+      btn.disabled = false;
+      btn.innerText = "投稿する";
+      return;
+    }
+
+    try {
+      // 1. Firebase（公開掲示板）にデータを保存
+      await addDoc(pollsCollection, {
+        name: authorName,
+        title: titleInput,
+        body: bodyInput,
+        options: optionsArray,
+        votes: optionsArray.length > 0 ? new Array(optionsArray.length).fill(0) : [],
+        createdAt: serverTimestamp()
+      });
+
+      // 2. Formspree（メール通知）へデータを裏側で送信
+      await fetch("https://formspree.io/f/xnjrejan", {
+        method: "POST",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          "お名前": authorName,
+          "タイトル": titleInput,
+          "詳しい内容": bodyInput || "（入力なし）",
+          "アンケート選択肢": optionsArray.length > 0 ? optionsArray.join(" / ") : "なし"
+        })
+      });
+
+      this.reset();
+    } catch (error) {
+      console.error(error);
+      alert("投稿またはメール送信に失敗しました。");
+    } finally {
+      btn.disabled = false;
+      btn.innerText = "投稿する";
+    }
+  });
+
+  // 投票実行処理
+  window.castVote = async function(pollId, optionIndex) {
+    const pollRef = doc(db, "user_polls", pollId);
+    
+    onSnapshot(pollRef, async (docSnap) => {
+      if (!docSnap.exists()) return;
+      const data = docSnap.data();
+      let currentVotes = [...data.votes];
+      const previousVoteIdx = myVotes[pollId];
+
+      if (previousVoteIdx === optionIndex) {
+        currentVotes[optionIndex] = Math.max(0, currentVotes[optionIndex] - 1);
+        delete myVotes[pollId];
+      } else {
+        if (previousVoteIdx !== undefined) {
+          currentVotes[previousVoteIdx] = Math.max(0, currentVotes[previousVoteIdx] - 1);
+        }
+        currentVotes[optionIndex] = (currentVotes[optionIndex] || 0) + 1;
+        myVotes[pollId] = optionIndex;
+      }
+
+      localStorage.setItem('myPollVotes', JSON.stringify(myVotes));
 
       try {
-        // Firebase（公開掲示板）にデータを保存
-        await addDoc(pollsCollection, {
-          name: authorName,
-          title: titleInput,
-          body: bodyInput,
-          options: optionsArray,
-          votes: optionsArray.length > 0 ? new Array(optionsArray.length).fill(0) : [],
-          isAA: isAAMode, // ▼ AAフラグを保存
-          createdAt: serverTimestamp()
-        });
-
-        // Formspree（メール通知）へデータを裏側で送信
-        await fetch("https://formspree.io/f/xnjrejan", {
-          method: "POST",
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            "お名前": authorName,
-            "タイトル": titleInput,
-            "詳しい内容": bodyInput,
-            "アンケート選択肢": optionsArray.length > 0 ? optionsArray.join(" / ") : "なし",
-            "AAモード": isAAMode ? "オン" : "オフ" // メール通知にもAAフラグを追加
-          })
-        });
-
-        // 送信成功したらフォームをリセット
-        this.reset();
-        alert("投稿が完了しました！");
-
-      } catch (error) {
-        console.error(error);
-        alert("投稿またはメール送信に失敗しました。");
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "投稿する";
+        await updateDoc(pollRef, { votes: currentVotes });
+      } catch (e) {
+        console.error(e);
       }
-    });
+    }, { onlyOnce: true });
+  };
 
-    // ----------------------------------------------------
-    // 2. 投稿一覧の表示処理（AAモードの反映）
-    // ----------------------------------------------------
-    const q = query(pollsCollection, orderBy("createdAt", "desc"));
-    const container = document.getElementById('polls-container');
+  function escapeHTML(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+</script>
 
-    onSnapshot(q, (snapshot) => {
-      container.innerHTML = ""; // 初期化
-      if (snapshot.empty) {
-        container.innerHTML = "<p>まだ投稿はありません。</p>";
-        return;
-      }
-
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        
-        // 投稿要素の作成
-        const postDiv = document.createElement('div');
-        postDiv.className = "post-card";
-
-        // ヘッダー（名前・日時）
-        const dateStr = data.createdAt ? data.createdAt.toDate().toLocaleString('ja-JP') : "送信中...";
-        const headerHTML = `<div class="post-header"><strong>${escapeHTML(data.name)}</strong> - ${dateStr}</div>`;
-
-        // タイトル
-        const titleHTML = `<div class="post-title">${escapeHTML(data.title)}</div>`;
-
-        // ▼ 本文（AAフラグがtrueなら aa-mode-text クラスを付与する） ▼
-        const bodyClass = data.isAA ? "aa-mode-text" : "";
-        
-        // 通常モードなら改行を<br>に変換、AAモードならそのまま（CSSの white-space: pre で処理）
-        let displayBody = escapeHTML(data.body);
-        if (!data.isAA) {
-           displayBody = displayBody.replace(/\n/g, "<br>");
-        }
-        
-        const bodyHTML = `<div class="${bodyClass}">${displayBody}</div>`;
-
-        // アンケート選択肢（存在する場合）
-        let optionsHTML = "";
-        if (data.options && data.options.length > 0) {
-          optionsHTML = `<div class="post-options"><strong>アンケート:</strong><ul>`;
-          data.options.forEach((opt, index) => {
-            const voteCount = data.votes ? data.votes[index] : 0;
-            optionsHTML += `<li>${escapeHTML(opt)} (${voteCount} 票)</li>`;
-          });
-          optionsHTML += `</ul></div>`;
-        }
-
-        // HTMLを組み立てて追加
-        postDiv.innerHTML = headerHTML + titleHTML + bodyHTML + optionsHTML;
-        container.appendChild(postDiv);
-      });
-    });
-
-    // XSS対策用のエスケープ関数
-    function escapeHTML(str) {
-      if (!str) return "";
-      return str.replace(/[&<>'"]/g, 
-        tag => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          "'": '&#39;',
-          '"': '&quot;'
-        }[tag])
-      );
-    }
-  </script>
 </body>
 </html>
